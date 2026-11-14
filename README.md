@@ -1,5 +1,7 @@
 # Project Backstop
 
+This submission uses **Angular 16.2 + TypeScript** for the frontend and **MySQL 8** as the system of record. The backend uses **Java 17+ and Spring Boot 3.5**, with **Flyway** for database migrations and **Spring Security with JWT** for authentication.
+
 Backstop accepts synthetic acquiring events and exposes a risk queue with versioned hold and release decisions. The queue shows refund and chargeback counts, ratios, open flags, and recent audit entries.
 
 ## Run
@@ -38,10 +40,22 @@ GRANT ALL PRIVILEGES ON backstop_angular.* TO 'backstop'@'localhost';
 
 Open this project's pom.xml in IntelliJ. Select JDK 21 or 17 and configure DB_PASSWORD and DEMO_PASSWORD for the backstop.Application run configuration. Flyway seeds the schema on startup. In VS Code, open ui, run npm ci and npm start. Open http://localhost:4200. To seed, open PowerShell at the repository root, set `$env:DEMO_PASSWORD` to the same value and run `python scripts/feed.py showcase --run showcase`. Sign in as analyst1, analyst2, or supervisor1.
 
-This is the separate Angular/MySQL edition. The Azentio submission requires React and PostgreSQL.
 
 ## JWT sign-in and demo walkthrough
 
 The API accepts credentials at POST /api/login and returns a one-hour JWT. Send it as Authorization: Bearer <token>. The signing key is generated when the API starts, so restarting the API requires signing in again. The Angular app keeps the token in memory. Sign in with the configured DEMO_PASSWORD. Use analyst1 or analyst2 to place holds and supervisor1 to release them. The Python seed script signs in as ingest automatically.
 
 After running the showcase seed, open showcase-m000 and place a hold with a reason of at least 15 characters. In a private browser window, sign in as supervisor1 and release with a reason. To test a stale decision, keep two analyst sessions open on the same version before either places the hold. The second action returns 409 and the UI reloads the merchant without resubmitting.
+
+## Clean checkout verification
+
+Run these from the repository root. Dependency installation is needed once. The test commands use no running MySQL, Redis or Docker.
+
+```bash
+mvn test
+npm --prefix ui ci
+npm test
+npm run build
+```
+
+Backend tests run against H2 in MySQL compatibility mode. Angular tests drive component logic with a mocked API. GitHub Actions runs the same commands on push and pull request. Redis is a read projection, so the incremental Redis updates, live integration tests, latency measurements and restart checks in the assignment remain incomplete.
