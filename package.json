@@ -1,0 +1,1 @@
+{"name":"backstop-workspace","private":true,"scripts":{"test":"npm --prefix ui test","build":"npm --prefix ui run build"}}

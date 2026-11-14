@@ -29,7 +29,7 @@
 <h2>{{merchant.merchantId}}</h2><p>{{merchant.status}} · Version {{merchant.version}}</p>
 <p *ngIf="notice" role="status">{{notice}}</p>
 <h3>Open flags</h3><p *ngFor="let f of merchant.openFlags">{{f.rule}} · {{f.ratio | percent:'1.0-2'}} · {{f.lastSeenAt | date:'medium'}}</p>
-<form *ngIf="merchant.status==='ACTIVE' || role==='SUPERVISOR'" (ngSubmit)="decide(merchant)">
+<form *ngIf="canDecide(merchant)" (ngSubmit)="decide(merchant)">
 <label>Decision reason<input name="reason" [(ngModel)]="reason" maxlength="500"></label>
 <button [disabled]="busy || reason.trim().length<15">{{merchant.status==='ACTIVE' ? 'Hold settlement' : 'Release settlement'}}</button>
 </form>

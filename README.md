@@ -45,3 +45,16 @@ This is the separate Angular/MySQL edition. The Azentio submission requires Reac
 The API accepts credentials at POST /api/login and returns a one-hour JWT. Send it as Authorization: Bearer <token>. The signing key is generated when the API starts, so restarting the API requires signing in again. The Angular app keeps the token in memory. Sign in with the configured DEMO_PASSWORD. Use analyst1 or analyst2 to place holds and supervisor1 to release them. The Python seed script signs in as ingest automatically.
 
 After running the showcase seed, open showcase-m000 and place a hold with a reason of at least 15 characters. In a private browser window, sign in as supervisor1 and release with a reason. To test a stale decision, keep two analyst sessions open on the same version before either places the hold. The second action returns 409 and the UI reloads the merchant without resubmitting.
+
+## Clean checkout verification
+
+Run these from the repository root. Dependency installation is needed once. The test commands use no running MySQL, Redis or Docker.
+
+```bash
+mvn test
+npm --prefix ui ci
+npm test
+npm run build
+```
+
+Backend tests run against H2 in MySQL compatibility mode. Angular tests drive component logic with a mocked API. GitHub Actions runs the same commands on push and pull request. Redis is a read projection, so the incremental Redis updates, live integration tests, latency measurements and restart checks in the assignment remain incomplete.
