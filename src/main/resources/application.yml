@@ -1,5 +1,7 @@
 spring:
   datasource:
+    hikari:
+      transaction-isolation: TRANSACTION_READ_COMMITTED
     url: ${DB_URL:jdbc:mysql://localhost:3306/backstop_angular}
     username: ${DB_USER:backstop}
     password: ${DB_PASSWORD:}

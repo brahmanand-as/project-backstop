@@ -79,7 +79,7 @@ class MerchantService {
             db.update("""
                 INSERT INTO merchant_event(id,merchant_id,type,amount,currency,occurred_at)
                 VALUES(?,?,?,?,?,?)
-                """,event.eventId(),id,event.type(),event.amount(),java.sql.Timestamp.from(event.occurredAt()));
+                """,event.eventId(),id,event.type(),event.amount(),event.currency(),java.sql.Timestamp.from(event.occurredAt()));
         } catch (org.springframework.dao.DuplicateKeyException duplicate) {
             transaction.rollbackToSavepoint(savepoint);
             return true;
