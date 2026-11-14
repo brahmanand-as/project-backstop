@@ -1,9 +1,9 @@
-<aside><div class="brand">Backstop</div><p>Merchant risk</p></aside>
+<aside><div class="brand"><span class="mark">B</span> Backstop</div><p>Settlement risk</p><nav *ngIf="signedIn"><span class="active">Merchant queue</span><span class="profile">{{username}} · {{role}}</span></nav></aside>
 <main>
-<header><h1>Merchant risk workspace</h1><button *ngIf="signedIn" [disabled]="busy" (click)="logout()">Sign out</button></header>
+<header><h1>{{signedIn ? "Merchant risk workspace" : "Risk team sign in"}}</h1><button *ngIf="signedIn" [disabled]="busy" (click)="logout()">Sign out</button></header>
 <p *ngIf="error" role="alert" class="error">{{error}}</p>
 <form *ngIf="!signedIn" (ngSubmit)="login()" class="card login">
-<h2>Sign in</h2>
+
 <label>Username<input name="username" [(ngModel)]="username" required></label>
 <label>Password<input name="password" type="password" [(ngModel)]="password" required></label>
 <button [disabled]="busy">Sign in</button>
@@ -13,23 +13,23 @@
 <label>Status<select [(ngModel)]="status" [disabled]="busy" (ngModelChange)="browse(0)">
 <option value="">All</option><option>ACTIVE</option><option>ON_HOLD</option></select></label>
 <p *ngIf="list?.items?.length === 0">No matching merchants.</p>
-<div class="row" *ngFor="let m of list?.items">
-<button [disabled]="busy" (click)="select(m.merchantId)">{{m.merchantId}}</button> · {{m.status}}
+<div class="merchant row" *ngFor="let m of list?.items">
+<button [disabled]="busy" (click)="select(m.merchantId)">{{m.merchantId}}</button> <span class="badge" [class.held]="m.status==='ON_HOLD'">{{m.status}}</span>
 <p>{{m.sales}} sales · {{m.refunds}} refunds · {{m.chargebacks}} chargebacks</p>
 <p><strong [class.error]="m.refundRatio > m.refundLimit">{{m.refundRatio | percent:'1.0-2'}} refunds</strong> · 
 <strong [class.error]="m.chargebackRatio > m.chargebackLimit">{{m.chargebackRatio | percent:'1.0-2'}} chargebacks</strong></p>
-<span *ngFor="let f of m.openFlags">{{f.rule}}</span>
+<span class="flag" *ngFor="let f of m.openFlags">{{f.rule}}</span>
 </div>
 <div class="actions" *ngIf="list as result">
 <button [disabled]="busy || page===0" (click)="browse(page-1)">Previous</button>
 <span>Page {{page+1}}</span>
 <button [disabled]="busy || (page+1)*result.size>=result.total" (click)="browse(page+1)">Next</button>
 </div></section>
-<section *ngIf="detail as merchant" class="card">
+<section *ngIf="detail as merchant" class="card detail">
 <h2>{{merchant.merchantId}}</h2><p>{{merchant.status}} · Version {{merchant.version}}</p>
 <p *ngIf="notice" role="status">{{notice}}</p>
 <h3>Open flags</h3><p *ngFor="let f of merchant.openFlags">{{f.rule}} · {{f.ratio | percent:'1.0-2'}} · {{f.lastSeenAt | date:'medium'}}</p>
-<form *ngIf="merchant.status==='ACTIVE' || username==='supervisor1'" (ngSubmit)="decide(merchant)">
+<form *ngIf="merchant.status==='ACTIVE' || role==='SUPERVISOR'" (ngSubmit)="decide(merchant)">
 <label>Decision reason<input name="reason" [(ngModel)]="reason" maxlength="500"></label>
 <button [disabled]="busy || reason.trim().length<15">{{merchant.status==='ACTIVE' ? 'Hold settlement' : 'Release settlement'}}</button>
 </form>

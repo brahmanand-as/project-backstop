@@ -1,6 +1,6 @@
 """Post deterministic synthetic events through the ingestion API."""
 import argparse
-import base64
+import functools
 import concurrent.futures
 import datetime as dt
 import json
@@ -18,11 +18,19 @@ password = os.environ["DEMO_PASSWORD"]
 start = dt.datetime(2026, 1, 1, tzinfo=dt.timezone.utc)
 rng = random.Random(2026)
 
+@functools.lru_cache(maxsize=4)
+def token(user):
+    req = urllib.request.Request(args.base + "/api/login",
+        data=json.dumps({"username":user, "password":password}).encode(),
+        headers={"Content-Type":"application/json"})
+    with urllib.request.urlopen(req, timeout=30) as response:
+        return json.load(response)["token"]
+
 def request(user, endpoint, body=None):
-    auth = base64.b64encode(f"{user}:{password}".encode()).decode()
+    auth = token(user)
     req = urllib.request.Request(args.base + endpoint,
         data=None if body is None else json.dumps(body).encode(),
-        headers={"Authorization":"Basic " + auth, "Content-Type":"application/json"})
+        headers={"Authorization":"Bearer " + auth, "Content-Type":"application/json"})
     with urllib.request.urlopen(req, timeout=30) as response:
         return json.load(response)
 
@@ -47,6 +55,7 @@ def send(event):
     return (time.perf_counter() - begin) * 1000
 
 if args.mode == "load":
+    token("ingest")
     with concurrent.futures.ThreadPoolExecutor(max_workers=20) as pool:
         samples = sorted(pool.map(send,events()))
     for quantile in (.5,.95,.99):

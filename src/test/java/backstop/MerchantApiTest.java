@@ -1,7 +1,7 @@
 package backstop;
 
 import java.time.Instant;
-import java.util.Base64;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.UUID;
 import java.util.concurrent.*;
 import org.junit.jupiter.api.Test;
@@ -21,8 +21,19 @@ class MerchantApiTest {
     static final Instant TIME = Instant.parse("2026-11-14T00:00:00Z");
     static final String REASON = "{\"version\":0,\"reason\":\"Review unusual refund activity\"}";
 
-    static String auth(String user) {
-        return "Basic " + Base64.getEncoder().encodeToString((user+":test-only").getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    private final ConcurrentHashMap<String,String> tokens = new ConcurrentHashMap<>();
+
+    String auth(String user) {
+        return tokens.computeIfAbsent(user,name -> {
+            try {
+                var login = api.perform(post("/api/login").contentType("application/json")
+                    .content("{\"username\":\"" + name + "\",\"password\":\"test-only\"}"))
+                    .andExpect(status().isOk()).andReturn();
+                var payload = new com.fasterxml.jackson.databind.ObjectMapper()
+                    .readTree(login.getResponse().getContentAsString());
+                return "Bearer " + payload.get("token").asText();
+            } catch (Exception e) { throw new AssertionError(e); }
+        });
     }
 
     String event(String id,String merchant,String type,Instant timestamp) {

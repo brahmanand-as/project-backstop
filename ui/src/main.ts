@@ -17,6 +17,7 @@ class App {
   username = 'analyst1';
   password = '';
   private auth = '';
+  role = '';
   signedIn = false;
   busy = false;
   status = '';
@@ -58,8 +59,14 @@ class App {
 
   login() {
     return this.run(async () => {
-      const bytes = new TextEncoder().encode(this.username + ':' + this.password);
-      this.auth = 'Basic ' + btoa(String.fromCharCode(...bytes));
+      const response = await fetch('/api/login', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({username:this.username,password:this.password})
+      });
+      if (!response.ok) throw new Error('Invalid credentials or API unavailable');
+      const result = await response.json() as {token:string;role:string};
+      this.auth = 'Bearer ' + result.token;
+      this.role = result.role;
       await this.refresh();
       this.password = '';
       this.signedIn = true;
@@ -68,6 +75,7 @@ class App {
 
   logout() {
     this.auth = '';
+    this.role = '';
     this.signedIn = false;
     this.detail = undefined;
     this.list = undefined;
