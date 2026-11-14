@@ -1,6 +1,8 @@
 target/
-node_modules/
+node_modules
 dist/
 .env
 .idea/
 .attach_pid*
+.angular/
+__pycache__/

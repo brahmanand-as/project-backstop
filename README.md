@@ -8,22 +8,6 @@ Requires Java 17+, Maven, Node.js 18, and Docker Compose for local infrastructur
 
 From `ui/`, run `npm ci`, then `npm start` and open http://localhost:4200. Use analyst1, analyst2 or supervisor1 with the configured demo password. The ingest account is for API clients. Populate a fresh database with `python scripts/feed.py showcase --run showcase` after exporting DEMO_PASSWORD for the script.
 
-## API examples
-
-Set `DEMO_PASSWORD` in your shell. The examples below use Bash syntax.
-
-```bash
-curl -u "ingest:$DEMO_PASSWORD" -H 'Content-Type: application/json' \
-  -d '{"eventId":"test-1","merchantId":"merchant-1","type":"SALE","amount":100,"currency":"INR","occurredAt":"2026-11-14T06:30:00Z"}' \
-  http://localhost:8080/api/merchant-events
-curl -u "analyst1:$DEMO_PASSWORD" 'http://localhost:8080/api/merchants?flagged=true&status=ON_HOLD&page=0&size=25'
-curl -u "analyst1:$DEMO_PASSWORD" http://localhost:8080/api/merchants/merchant-1
-curl -u "analyst1:$DEMO_PASSWORD" -H 'Content-Type: application/json' \
-  -d '{"version":0,"reason":"Review unusual refund activity"}' http://localhost:8080/api/merchants/merchant-1/hold
-curl -u "supervisor1:$DEMO_PASSWORD" -H 'Content-Type: application/json' \
-  -d '{"version":1,"reason":"Completed merchant evidence review"}' http://localhost:8080/api/merchants/merchant-1/release
-```
-
 ## Architecture
 
 The merchant row owns only the control status and version. Hold and release use a guarded SQL update conditioned on both displayed version and legal starting status. Ingestion locks a separate feed row and advances only its feed revision, so fresh events cannot invalidate a decision. A successful state change and its audit insert commit together, and a rejected decision changes neither.
@@ -55,3 +39,9 @@ GRANT ALL PRIVILEGES ON backstop_angular.* TO 'backstop'@'localhost';
 Open this project's pom.xml in IntelliJ. Select JDK 21 or 17 and configure DB_PASSWORD and DEMO_PASSWORD for the backstop.Application run configuration. Flyway seeds the schema on startup. In VS Code, open ui, run npm ci and npm start. Open http://localhost:4200. To seed, open PowerShell at the repository root, set `$env:DEMO_PASSWORD` to the same value and run `python scripts/feed.py showcase --run showcase`. Sign in as analyst1, analyst2, or supervisor1.
 
 This is the separate Angular/MySQL edition. The Azentio submission requires React and PostgreSQL.
+
+## JWT sign-in and demo walkthrough
+
+The API accepts credentials at POST /api/login and returns a one-hour JWT. Send it as Authorization: Bearer <token>. The signing key is generated when the API starts, so restarting the API requires signing in again. The Angular app keeps the token in memory. Sign in with the configured DEMO_PASSWORD. Use analyst1 or analyst2 to place holds and supervisor1 to release them. The Python seed script signs in as ingest automatically.
+
+After running the showcase seed, open showcase-m000 and place a hold with a reason of at least 15 characters. In a private browser window, sign in as supervisor1 and release with a reason. To test a stale decision, keep two analyst sessions open on the same version before either places the hold. The second action returns 409 and the UI reloads the merchant without resubmitting.
