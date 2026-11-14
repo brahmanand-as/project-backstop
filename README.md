@@ -1,5 +1,7 @@
 # Project Backstop
 
+This submission uses **Angular 16.2 + TypeScript** for the frontend and **MySQL 8** as the system of record. The backend uses **Java 17+ and Spring Boot 3.5**, with **Flyway** for database migrations and **Spring Security with JWT** for authentication.
+
 Backstop accepts synthetic acquiring events and exposes a risk queue with versioned hold and release decisions. The queue shows refund and chargeback counts, ratios, open flags, and recent audit entries.
 
 ## Run
@@ -38,7 +40,6 @@ GRANT ALL PRIVILEGES ON backstop_angular.* TO 'backstop'@'localhost';
 
 Open this project's pom.xml in IntelliJ. Select JDK 21 or 17 and configure DB_PASSWORD and DEMO_PASSWORD for the backstop.Application run configuration. Flyway seeds the schema on startup. In VS Code, open ui, run npm ci and npm start. Open http://localhost:4200. To seed, open PowerShell at the repository root, set `$env:DEMO_PASSWORD` to the same value and run `python scripts/feed.py showcase --run showcase`. Sign in as analyst1, analyst2, or supervisor1.
 
-This is the separate Angular/MySQL edition. The Azentio submission requires React and PostgreSQL.
 
 ## JWT sign-in and demo walkthrough
 
