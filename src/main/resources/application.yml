@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/backstop_angular}
+    username: ${DB_USER:backstop}
+    password: ${DB_PASSWORD:}
+backstop:
+  store: ${RISK_STORE:memory}
+  demo-password: ${DEMO_PASSWORD:}
+  window: ${RISK_WINDOW:PT24H}
+  min-sales: ${RISK_MIN_SALES:20}
+  refund-limit: ${RISK_REFUND_LIMIT:0.15}
+  chargeback-limit: ${RISK_CHARGEBACK_LIMIT:0.02}

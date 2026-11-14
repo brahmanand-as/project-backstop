@@ -1,0 +1,11 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:backstop;MODE=MySQL;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+backstop:
+  demo-password: test-only
+  window: PT24H
+  min-sales: 20
+  refund-limit: 0.15
+  chargeback-limit: 0.02

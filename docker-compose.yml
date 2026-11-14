@@ -1,0 +1,18 @@
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: backstop_angular
+      MYSQL_USER: backstop
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+    ports: ["127.0.0.1:3306:3306"]
+    volumes: ["backstop_db:/var/lib/mysql"]
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    ports: ["127.0.0.1:6379:6379"]
+    volumes: ["backstop_redis:/data"]
+volumes:
+  backstop_db:
+  backstop_redis:
